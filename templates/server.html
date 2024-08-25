@@ -1,5 +1,5 @@
 {{define "title"}}
-Wireguard Server
+Aershield VPN Server
 {{end}}
 
 {{define "top_css"}}
@@ -10,13 +10,13 @@ Wireguard Server
 {{end}}
 
 {{define "page_title"}}
-Wireguard Server Settings
+Aershield VPN Server Settings
 {{end}}
 
 {{define "page_content"}}
 <section class="content">
     <div class="container-fluid">
-        <!-- <h5 class="mt-4 mb-2">Wireguard Server</h5> -->
+        <!-- <h5 class="mt-4 mb-2">Aershield VPN Server</h5> -->
         <div class="row">
             <!-- left column -->
             <div class="col-md-6">
@@ -115,7 +115,7 @@ Wireguard Server Settings
                 </button>
             </div>
             <div class="modal-body">
-                <p>Are you sure to generate a new key pair for the Wireguard server?<br/>
+                <p>Are you sure to generate a new key pair for the Aershield VPN server?<br/>
                 The existing Client's peer public key need to be updated to keep the connection working.</p>
             </div>
             <div class="modal-footer justify-content-between">
@@ -149,7 +149,7 @@ Wireguard Server Settings
                 data: JSON.stringify(data),
                 success: function(data) {
                     $("#modal_new_client").modal('hide');
-                    toastr.success('Updated Wireguard server interface addresses successfully');
+                    toastr.success('Updated Aershield VPN server interface addresses successfully');
                 },
                 error: function(jqXHR, exception) {
                     const responseJson = jQuery.parseJSON(jqXHR.responseText);
@@ -159,7 +159,7 @@ Wireguard Server Settings
         }
     </script>
     <script>
-        // Wireguard Interface Addresses tag input
+        // Aershield VPN Interface Addresses tag input
         $("#addresses").tagsInput({
             'width': '100%',
             // 'height': '75%',
