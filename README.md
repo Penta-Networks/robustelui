@@ -1,8 +1,8 @@
 ![](https://github.com/ngoduykhanh/wireguard-ui/workflows/wireguard-ui%20build%20release/badge.svg)
 
-# wireguard-ui
+# robustelui
 
-A web user interface to manage your WireGuard setup.
+A web user interface to manage Robustel setup.
 
 ## Features
 
