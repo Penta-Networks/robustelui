@@ -94,6 +94,62 @@ func BuildClientConfig(client model.Client, server model.Server, setting model.G
 	return strConfig
 }
 
+func BuildRobustelConfig(client model.Client, server model.Server, setting model.GlobalSetting) string {
+	// Interface section
+	clientAddress := fmt.Sprintf("Address = %s\n", strings.Join(client.AllocatedIPs, ","))
+	clientPrivateKey := fmt.Sprintf("PrivateKey = %s\n", client.PrivateKey)
+	clientDNS := ""
+	if client.UseServerDNS {
+		clientDNS = fmt.Sprintf("DNS = %s\n", strings.Join(setting.DNSServers, ","))
+	}
+	clientMTU := ""
+	if setting.MTU > 0 {
+		clientMTU = fmt.Sprintf("MTU = %d\n", setting.MTU)
+	}
+
+	// Peer section
+	peerPublicKey := fmt.Sprintf("PublicKey = %s\n", server.KeyPair.PublicKey)
+	peerPresharedKey := ""
+	if client.PresharedKey != "" {
+		peerPresharedKey = fmt.Sprintf("PresharedKey = %s\n", client.PresharedKey)
+	}
+
+	peerAllowedIPs := fmt.Sprintf("AllowedIPs = %s\n", strings.Join(client.AllowedIPs, ","))
+
+	desiredHost := setting.EndpointAddress
+	desiredPort := server.Interface.ListenPort
+	if strings.Contains(desiredHost, ":") {
+		split := strings.Split(desiredHost, ":")
+		desiredHost = split[0]
+		if n, err := strconv.Atoi(split[1]); err == nil {
+			desiredPort = n
+		} else {
+			log.Error("Endpoint appears to be incorrectly formatted: ", err)
+		}
+	}
+	peerEndpoint := fmt.Sprintf("Endpoint = %s:%d\n", desiredHost, desiredPort)
+
+	peerPersistentKeepalive := ""
+	if setting.PersistentKeepalive > 0 {
+		peerPersistentKeepalive = fmt.Sprintf("PersistentKeepalive = %d\n", setting.PersistentKeepalive)
+	}
+
+	// build the config as string
+	strConfig := "[Interface]\n" +
+		clientAddress +
+		clientPrivateKey +
+		clientDNS +
+		clientMTU +
+		"\n[Peer]\n" +
+		peerPublicKey +
+		peerPresharedKey +
+		peerAllowedIPs +
+		peerEndpoint +
+		peerPersistentKeepalive
+
+	return strConfig
+}
+
 // ClientDefaultsFromEnv to read the default values for creating a new client from the environment or use sane defaults
 func ClientDefaultsFromEnv() model.ClientDefaults {
 	clientDefaults := model.ClientDefaults{}
