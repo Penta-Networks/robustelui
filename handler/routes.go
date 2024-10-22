@@ -804,6 +804,44 @@ func DownloadClient(db store.IStore) echo.HandlerFunc {
 	}
 }
 
+// DownloadClient handler
+func Robustel(db store.IStore) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		clientID := c.QueryParam("clientid")
+		if clientID == "" {
+			return c.JSON(http.StatusNotFound, jsonHTTPResponse{false, "Missing clientid parameter"})
+		}
+
+		if _, err := xid.FromString(clientID); err != nil {
+			return c.JSON(http.StatusBadRequest, jsonHTTPResponse{false, "Please provide a valid client ID"})
+		}
+
+		clientData, err := db.GetClientByID(clientID, model.QRCodeSettings{Enabled: false})
+		if err != nil {
+			log.Errorf("Cannot generate client id %s config file for downloading: %v", clientID, err)
+			return c.JSON(http.StatusNotFound, jsonHTTPResponse{false, "Client not found"})
+		}
+
+		// build config
+		server, err := db.GetServer()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{false, err.Error()})
+		}
+		globalSettings, err := db.GetGlobalSettings()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{false, err.Error()})
+		}
+		config := util.BuildClientConfig(*clientData.Client, server, globalSettings)
+
+		// create io reader from string
+		reader := strings.NewReader(config)
+
+		// set response header for downloading
+		c.Response().Header().Set(echo.HeaderContentDisposition, fmt.Sprintf("attachment; filename=%s.conf", clientData.Client.Name))
+		return c.Stream(http.StatusOK, "text/conf", reader)
+	}
+}
+
 // RemoveClient handler
 func RemoveClient(db store.IStore) echo.HandlerFunc {
 	return func(c echo.Context) error {
